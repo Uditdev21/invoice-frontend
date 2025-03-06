@@ -81539,7 +81539,7 @@ return A.azd(A.avX(s,A.eg("Amount: $"+A.k(q.i(r,"Cost")),s,s,s,s,s,s),p,A.afr(A.
 $S:499}
 A.anj.prototype={
 $0(){var s=this.a,r=J.aq(s)
-A.awn("Click the link to check INVOICE: \n\n\ud83d\udd17 http://localhost:51309/#/invoice/"+A.k(r.i(s,"_id"))+"\n\n**Invoice Details:**\n\ud83c\udd94 Invoice ID: "+A.k(r.i(s,"_id"))+"\n\ud83d\udcb0 Amount: $"+A.k(r.i(s,"Cost"))+"\n")},
+A.awn("Click the link to check INVOICE: \n\n\ud83d\udd17 https://invoice-frontend-fawn.vercel.app/#/invoice/"+A.k(r.i(s,"_id"))+"\n\n**Invoice Details:**\n\ud83c\udd94 Invoice ID: "+A.k(r.i(s,"_id"))+"\n\ud83d\udcb0 Amount: $"+A.k(r.i(s,"Cost"))+"\n")},
 $S:0}
 A.aug.prototype={
 $1(a){return!0},

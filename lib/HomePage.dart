@@ -105,7 +105,7 @@ class _HomepageState extends ConsumerState<Homepage> {
                                       onPressed: () {
                                         String invoiceDetails =
                                             "Click the link to check INVOICE: \n\n"
-                                            "🔗 http://localhost:51309/#/invoice/${invoice['_id']}\n\n"
+                                            "🔗 https://invoice-frontend-fawn.vercel.app/#/invoice/${invoice['_id']}\n\n"
                                             "**Invoice Details:**\n"
                                             "🆔 Invoice ID: ${invoice['_id']}\n"
                                             "💰 Amount: \$${invoice['Cost']}\n";
