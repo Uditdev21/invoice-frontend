@@ -76,7 +76,8 @@ class InvoiceNotifier extends StateNotifier<Map<String, dynamic>> {
   void submitInvoice(WidgetRef ref, BuildContext context) async {
     try {
       final token = ref.read(authProvider.notifier).token;
-      final uri = Uri.parse('http://127.0.0.1:8000/client/createinvoice');
+      final uri = Uri.parse(
+          'https://cloud-invoice-backend.onrender.com/client/createinvoice');
       final response = await http.post(uri,
           headers: {
             'Authorization': 'Bearer $token',
