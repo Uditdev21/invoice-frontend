@@ -2,7 +2,16 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
-enum AuthState { idle, loading, authenticated, unauthenticated, error }
+enum AuthState {
+  idle,
+  loading,
+  authenticated,
+  unauthenticated,
+  error,
+  registerLoding,
+  registerError,
+  registerSuccess
+}
 
 class AuthClass extends StateNotifier<AuthState> {
   AuthClass() : super(AuthState.unauthenticated);
@@ -14,7 +23,7 @@ class AuthClass extends StateNotifier<AuthState> {
 
   Future<void> register(String email, String password, String Name,
       String CompanyName, String Address, String Phone) async {
-    state = AuthState.loading;
+    state = AuthState.registerLoding;
 
     try {
       final uri = Uri.parse(
@@ -32,13 +41,14 @@ class AuthClass extends StateNotifier<AuthState> {
       if (response.statusCode == 200) {
         final responseData = jsonDecode(response.body);
         _token = responseData["access_token"];
-        state = AuthState.authenticated;
+        print("token_data_is:${_token}");
+        state = AuthState.registerSuccess;
       } else {
         state = AuthState.unauthenticated;
       }
     } catch (e) {
       _error = e.toString();
-      state = AuthState.error;
+      state = AuthState.registerError;
     }
   }
 

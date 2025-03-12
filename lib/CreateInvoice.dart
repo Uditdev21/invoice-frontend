@@ -4,6 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:invoice/providers/authProvider.dart';
 
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
+import 'package:invoice/providers/authProvider.dart';
+
 final invoiceProvider =
     StateNotifierProvider<InvoiceNotifier, Map<String, dynamic>>(
   (ref) => InvoiceNotifier(),
@@ -22,7 +28,8 @@ class InvoiceNotifier extends StateNotifier<Map<String, dynamic>> {
             "date": "",
             "due_date": "",
           },
-          "items": [], // 2D List: [[name, quantity, price]]
+          "items": [],
+          "isLoading": false,
         });
 
   void updateClientInfo(String key, String value) {
@@ -75,6 +82,13 @@ class InvoiceNotifier extends StateNotifier<Map<String, dynamic>> {
 
   void submitInvoice(WidgetRef ref, BuildContext context) async {
     try {
+      state = {...state, "isLoading": true};
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
       final token = ref.read(authProvider.notifier).token;
       final uri = Uri.parse(
           'https://cloud-invoice-backend.onrender.com/client/createinvoice');
@@ -84,7 +98,9 @@ class InvoiceNotifier extends StateNotifier<Map<String, dynamic>> {
             'Content-Type': 'application/json'
           },
           body: jsonEncode(state));
-      print(response.body);
+
+      Navigator.of(context).pop(); // Close loading dialog
+
       if (response.statusCode == 201) {
         showDialog(
           context: context,
@@ -104,7 +120,10 @@ class InvoiceNotifier extends StateNotifier<Map<String, dynamic>> {
         );
       }
     } catch (e) {
+      Navigator.of(context).pop(); // Close loading dialog in case of error
       print("Error: $e");
+    } finally {
+      state = {...state, "isLoading": false};
     }
   }
 
@@ -121,6 +140,7 @@ class InvoiceNotifier extends StateNotifier<Map<String, dynamic>> {
         "due_date": "",
       },
       "items": [],
+      "isLoading": false,
     };
   }
 }

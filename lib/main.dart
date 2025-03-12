@@ -18,7 +18,7 @@ class AuthStateListener extends ChangeNotifier {
     // Subscribe to authProvider changes
     ref.listen<AuthState>(authProvider, (previous, next) {
       // Notify listeners (e.g., GoRouter) on state change
-      // print('AuthState changed from $previous to $next'); // Debugging
+      print('AuthState changed from $previous to $next'); // Debugging
       notifyListeners();
     });
   }
@@ -36,59 +36,76 @@ final goRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
 
   return GoRouter(
-    refreshListenable: authStateListener,
-    routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const Homepage(),
-      ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginPage(),
-      ),
-      GoRoute(
-        path: '/createInvoice',
-        builder: (context, state) => const InvoiceCreatePage(),
-      ),
-      GoRoute(
-        path: '/invoice/:id',
-        builder: (context, state) {
-          final id = state.pathParameters['id'] ?? 'unknown';
-          return InvoicePage(id: id);
-        },
-      ),
-      GoRoute(
-        path: '/register',
-        builder: (context, state) {
-          // final id = state.pathParameters['id'] ?? 'unknown';
-          return RegisterPage();
-        },
-      ),
-    ],
-    redirect: (context, state) {
-      // Allow access to invoice route even if unauthenticated
-      if (state.matchedLocation.startsWith('/invoice/')) {
+      refreshListenable: authStateListener,
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const Homepage(),
+        ),
+        GoRoute(
+          path: '/login',
+          builder: (context, state) => const LoginPage(),
+        ),
+        GoRoute(
+          path: '/createInvoice',
+          builder: (context, state) => const InvoiceCreatePage(),
+        ),
+        GoRoute(
+          path: '/invoice/:id',
+          builder: (context, state) {
+            final id = state.pathParameters['id'] ?? 'unknown';
+            return InvoicePage(id: id);
+          },
+        ),
+        GoRoute(
+          path: '/register',
+          builder: (context, state) {
+            // final id = state.pathParameters['id'] ?? 'unknown';
+            return RegisterPage();
+          },
+        ),
+      ],
+      redirect: (context, state) {
+        // Always allow invoice routes
+        if (state.matchedLocation.startsWith('/invoice/')) {
+          return null;
+        }
+
+        // If unauthenticated or in register-loading state, only allow /register and /login
+        if (authState == AuthState.unauthenticated ||
+            authState == AuthState.registerLoding) {
+          if (state.matchedLocation == '/register' ||
+              state.matchedLocation == '/login') {
+            return null;
+          }
+          if (authState == AuthState.registerLoding) {
+            return '/register';
+          }
+          if (authState == AuthState.registerError) {
+            return '/register';
+          }
+          if (authState == AuthState.registerSuccess) {
+            return '/login';
+          }
+        }
+
+        // If in error or loading state (and not already on /login), redirect to login
+        if ((authState == AuthState.error ||
+                authState == AuthState.loading ||
+                authState == AuthState.unauthenticated) &&
+            state.matchedLocation != '/login') {
+          return '/login';
+        }
+
+        // Prevent authenticated users from accessing the login page
+        if (authState == AuthState.authenticated &&
+            state.matchedLocation == '/login') {
+          return '/';
+        }
+
+        // No redirection needed
         return null;
-      }
-      if (state.matchedLocation.contains('/register')) {
-        return null;
-      }
-
-      // Redirect to login if unauthenticated and trying to access protected routes
-      if (authState == AuthState.unauthenticated ||
-          authState == AuthState.error && state.matchedLocation != '/login') {
-        return '/login';
-      }
-
-      // If authenticated, prevent access to login page and redirect to home
-      if (authState == AuthState.authenticated &&
-          state.matchedLocation == '/login') {
-        return '/';
-      }
-
-      return null; // No redirection needed
-    },
-  );
+      });
 });
 
 class MyApp extends ConsumerWidget {

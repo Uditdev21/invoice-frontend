@@ -23,6 +23,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+
     return Scaffold(
       appBar: AppBar(title: const Text("Register")),
       body: Padding(
@@ -55,12 +57,23 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                 const SizedBox(height: 20),
                 Center(
                   child: ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        _registerUser();
-                      }
-                    },
-                    child: const Text("Register"),
+                    onPressed: authState == AuthState.registerLoding
+                        ? null
+                        : () {
+                            if (_formKey.currentState!.validate()) {
+                              _registerUser();
+                            }
+                          },
+                    child: authState == AuthState.registerLoding
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text("Register"),
                   ),
                 ),
               ],
@@ -109,7 +122,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   }
 
   void _registerUser() {
-    // Handle registration logic here
     ref.read(authProvider.notifier).register(
           _emailController.text.trim(),
           _passwordController.text.trim(),
